@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quiz GoGreen DHL Supply Chain</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff9e6;
+      margin: 0; padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    #root {
+      background: white;
+      max-width: 480px;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 24px;
+    }
+    button {
+      width: 100%;
+      background-color: #facc15;
+      border: none;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #4b2800;
+      transition: background-color 0.2s ease;
+    }
+    button:hover {
+      background-color: #eab308;
+    }
+    .feedback {
+      margin-top: 16px;
+      font-weight: 600;
+      min-height: 24px;
+    }
+    .correct {
+      color: green;
+    }
+    .wrong {
+      color: red;
+    }
+    h1 {
+      color: #ca8a04;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    h2 {
+      margin-top: 16px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    p {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React and ReactDOM via CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script>
+    const { useState } = React;
+
+    const questions = [
+      {
+        text: "Você encontra uma luz acesa em uma área não utilizada. O que você faz?",
+        options: [
+          { text: "Ignora, deve ter um motivo.", correct: false },
+          { text: "Apaga imediatamente e verifica o motivo.", correct: true },
+          { text: "Chama alguém da segurança.", correct: false }
+        ]
+      },
+      {
+        text: "Há caixas danificadas que podem ser reaproveitadas. Você:",
+        options: [
+          { text: "Reaproveita e orienta a equipe.", correct: true },
+          { text: "Descarta para evitar riscos.", correct: false },
+          { text: "Ignora, não é sua área.", correct: false }
+        ]
+      },
+      {
+        text: "Durante o transporte, o que reduz a emissão de CO₂?",
+        options: [
+          { text: "Aumentar a velocidade.", correct: false },
+          { text: "Planejar rotas eficientes.", correct: true },
+          { text: "Transportar em horários de pico.", correct: false }
+        ]
+      },
+      {
+        text: "Como economizar energia em CDs?",
+        options: [
+          { text: "Deixar climatização ligada 24h.", correct: false },
+          { text: "Usar sensores e desligar fora do uso.", correct: true },
+          { text: "Reduzir a iluminação sempre.", correct: false }
+        ]
+      },
+      {
+        text: "O que representa o selo GoGreen?",
+        options: [
+          { text: "Produto importado.", correct: false },
+          { text: "Produto com logística sustentável.", correct: true },
+          { text: "Produto reciclado.", correct: false }
+        ]
+      },
+      {
+        text: "Qual a importância de separar corretamente resíduos na operação?",
+        options: [
+          { text: "Evita contaminação e facilita reciclagem.", correct: true },
+          { text: "Não faz diferença.", correct: false },
+          { text: "Só para economizar espaço.", correct: false }
+        ]
+      },
+      {
+        text: "Qual atitude contribui para reduzir o consumo de papel?",
+        options: [
+          { text: "Imprimir sempre que possível.", correct: false },
+          { text: "Usar documentos digitais e compartilhar online.", correct: true },
+          { text: "Guardar papéis antigos.", correct: false }
+        ]
+      },
+      {
+        text: "Ao observar desperdício de materiais, você:",
+        options: [
+          { text: "Ignora, não é sua função.", correct: false },
+          { text: "Comunica e sugere melhorias.", correct: true },
+          { text: "Aumenta o estoque.", correct: false }
+        ]
+      }
+    ];
+
+    function GoGreenQuiz() {
+      const [currentQuestion, setCurrentQuestion] = useState(0);
+      const [feedback, setFeedback] = useState("");
+      const [completed, setCompleted] = useState(false);
+      const [score, setScore] = useState(0);
+
+      const handleAnswer = (option) => {
+        if (option.correct) {
+          setScore(prev => prev + 1);
+          setFeedback({ text: "✅ Correto!", type: "correct" });
+          setTimeout(() => {
+            if (currentQuestion + 1 < questions.length) {
+              setCurrentQuestion(currentQuestion + 1);
+              setFeedback("");
+            } else {
+              setCompleted(true);
+              setFeedback("");
+            }
+          }, 1200);
+        } else {
+          // Mostra resposta correta e desconta 1 ponto se possível
+          const correctOption = questions[currentQuestion].options.find(opt => opt.correct);
+          setFeedback({ 
+            text: `❌ Errado! A resposta correta é: "${correctOption.text}"`, 
+            type: "wrong" 
+          });
+          setScore(prev => (prev > 0 ? prev - 1 : 0));
+        }
+      };
+
+      const restartQuiz = () => {
+        setCurrentQuestion(0);
+        setScore(0);
+        setCompleted(false);
+        setFeedback("");
+      };
+
+      if (completed) {
+        return (
+          React.createElement('div', { style: { textAlign: 'center' } },
+            React.createElement('h1', null, "Quiz Concluído! 🎉"),
+            React.createElement('p', null, `Sua pontuação final foi: ${score} de ${questions.length}`),
+            React.createElement('button', { onClick: restartQuiz }, "Reiniciar Quiz")
+          )
+        );
+      }
+
+      const question = questions[currentQuestion];
+
+      return (
+        React.createElement('div', null,
+          React.createElement('h1', null, "GoGreen na Operação | DHL Supply Chain"),
+          React.createElement('p', null,
+            React.createElement('strong', null, "O que é o GoGreen?"), React.createElement('br'),
+            "Compromisso da DHL com a sustentabilidade nas operações logísticas.", React.createElement('br'),
+            "Nosso objetivo é operar com mais eficiência, reduzindo impactos ambientais e inovando com responsabilidade."
+          ),
+          React.createElement('h2', null, question.text),
+          question.options.map((opt, i) =>
+            React.createElement('button', {
+              key: i,
+              onClick: () => handleAnswer(opt),
+              type: "button"
+            }, opt.text)
+          ),
+          React.createElement('div', { className: 'feedback ' + (feedback.type || '') }, feedback.text),
+          React.createElement('button', {
+            onClick: restartQuiz,
+            style: { marginTop: '20px', backgroundColor: '#f59e0b', color: '#fff' }
+          }, "Reiniciar Quiz")
+        )
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(
+      React.createElement(GoGreenQuiz)
+    );
+  </script>
+</body>
+</html>
