@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini-Jogo GoGreen DHL</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 500px;
+      width: 100%;
+      border: 3px solid #d40511; /* vermelho DHL */
+      border-radius: 8px;
+      padding: 20px;
+      box-sizing: border-box;
+      background: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #d40511;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h2 {
+      color: #d40511;
+      margin-bottom: 15px;
+    }
+    button {
+      background-color: #f4b800; /* amarelo DHL */
+      border: none;
+      color: #d40511;
+      font-weight: bold;
+      padding: 12px;
+      margin: 6px 0;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    button:hover:not(:disabled) {
+      background-color: #e0a800;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    .feedback {
+      background-color: #fff4cc;
+      padding: 15px;
+      border-radius: 5px;
+      font-style: italic;
+      margin: 20px 0;
+      min-height: 60px;
+    }
+    .result {
+      font-weight: bold;
+      font-size: 18px;
+      text-align: center;
+      margin: 15px 0;
+    }
+    .message-green {
+      color: green;
+    }
+    .message-orange {
+      color: orange;
+    }
+    .message-red {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>GoGreen Mini-Jogo DHL</h1>
+    <div id="game-content">
+      <!-- Conteúdo dinâmico aqui -->
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: "Escolha seu veículo:",
+        options: [
+          { text: "Caminhão Elétrico", points: 2, feedback: "Ótima escolha! Veículos elétricos reduzem emissões." },
+          { text: "Caminhão a Diesel", points: 0, feedback: "Veículos a diesel poluem mais e geram mais CO2." }
+        ]
+      },
+      {
+        question: "Fonte de energia para o Centro de Distribuição:",
+        options: [
+          { text: "Energia Solar", points: 2, feedback: "Energia limpa reduz impacto ambiental e custos." },
+          { text: "Energia Tradicional", points: 0, feedback: "Energia tradicional costuma ter maior pegada de carbono." }
+        ]
+      },
+      {
+        question: "Como evitar desperdícios:",
+        options: [
+          { text: "Reciclagem e Reaproveitamento", points: 2, feedback: "Reciclar reduz lixo e economiza recursos." },
+          { text: "Descartar direto", points: 0, feedback: "Descartar sem reciclar aumenta resíduos e impactos." }
+        ]
+      },
+      {
+        question: "Como otimizar a rota de entrega:",
+        options: [
+          { text: "Roteirização inteligente", points: 2, feedback: "Reduz distância, tempo e consumo de combustível." },
+          { text: "Rota tradicional", points: 0, feedback: "Rotas não otimizadas causam mais desperdício." }
+        ]
+      }
+    ];
+
+    let step = 0;
+    let score = 0;
+    let showFeedback = false;
+
+    const gameContent = document.getElementById('game-content');
+
+    function renderStart() {
+      gameContent.innerHTML = `
+        <p>Bem-vindo ao mini-jogo GoGreen! Em cada etapa, faça escolhas sustentáveis para reduzir o impacto ambiental na operação logística.</p>
+        <button id="start-btn">Começar</button>
+      `;
+      document.getElementById('start-btn').onclick = () => {
+        step = 0;
+        score = 0;
+        showFeedback = false;
+        renderQuestion();
+      };
+    }
+
+    function renderQuestion() {
+      const q = questions[step];
+      let optionsHtml = q.options.map((opt, idx) =>
+        `<button class="option-btn" data-idx="${idx}">${opt.text}</button>`
+      ).join('');
+
+      gameContent.innerHTML = `
+        <h2>${q.question}</h2>
+        <div>${optionsHtml}</div>
+        <div class="feedback" id="feedback" style="display:none;"></div>
+        <button id="next-btn" disabled>Próximo</button>
+      `;
+
+      const optionButtons = document.querySelectorAll('.option-btn');
+      optionButtons.forEach(btn => {
+        btn.onclick = () => {
+          const idx = parseInt(btn.getAttribute('data-idx'));
+          handleAnswer(idx);
+        };
+      });
+
+      document.getElementById('next-btn').onclick = () => {
+        step++;
+        showFeedback = false;
+        if (step < questions.length) {
+          renderQuestion();
+        } else {
+          renderResult();
+        }
+      };
+    }
+
+    function handleAnswer(selectedIdx) {
+      if (showFeedback) return; // evita clicar mais de uma vez
+
+      const q = questions[step];
+      const opt = q.options[selectedIdx];
+
+      score += opt.points;
+
+      const feedbackDiv = document.getElementById('feedback');
+      feedbackDiv.textContent = opt.feedback;
+      feedbackDiv.style.display = 'block';
+
+      // Desabilitar botões opção após escolha
+      document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+
+      // Habilitar próximo botão
+      const nextBtn = document.getElementById('next-btn');
+      nextBtn.disabled = false;
+
+      showFeedback = true;
+    }
+
+    function renderResult() {
+      let message = "";
+      let className = "";
+
+      const maxScore = questions.length * 2;
+
+      if (score === maxScore) {
+        message = "Parabéns! Você é um verdadeiro campeão do GoGreen! 🌱";
+        className = "message-green";
+      } else if (score >= maxScore / 2) {
+        message = "Muito bom! Continue buscando melhorar suas práticas sustentáveis.";
+        className = "message-orange";
+      } else {
+        message = "Vamos tentar de novo? Pequenas atitudes fazem grande diferença!";
+        className = "message-red";
+      }
+
+      gameContent.innerHTML = `
+        <h2>Resultado Final</h2>
+        <p class="result">Você fez ${score} pontos de ${maxScore} possíveis.</p>
+        <p class="${className}" style="font-weight:bold; text-align:center;">${message}</p>
+        <button id="restart-btn">Jogar Novamente</button>
+      `;
+
+      document.getElementById('restart-btn').onclick = () => {
+        renderStart();
+      };
+    }
+
+    // Inicializa o jogo
+    renderStart();
+  </script>
+</body>
+</html>
